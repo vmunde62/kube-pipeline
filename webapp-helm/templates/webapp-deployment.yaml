@@ -50,20 +50,12 @@ spec:
               value: {{ .Values.Secrets.Objects.tlskey.path }} 
             - name: {{ .Values.Secrets.Objects.password.name }}
               value: {{ .Values.Secrets.Objects.password.path }} 
-            - name: {{ .Values.Secrets.Objects.trustedca1.name }}
-              value: {{ .Values.Secrets.Objects.trustedca1.path }}
-            - name: {{ .Values.Secrets.Objects.trustedca2.name }}
-              value: {{ .Values.Secrets.Objects.trustedca2.path }}
-            - name: {{ .Values.Secrets.Objects.trustedca3.name }}
-              value: {{ .Values.Secrets.Objects.trustedca3.path }}
             - name: keystore_pkcs12
               value: {{ .Values.init.pkcsPath }}
             - name: keystore_jks
               value: {{ .Values.init.jksPath }}
-            - name: client_truststore
-              value: {{ .Values.init.truststorePath}}
           command: ["/bin/sh"]
-          args: ["-c", "{{ .Values.init.keystore_run }};{{ .Values.init.truststore_run }}" ]
+          args: ["-c", "{{ .Values.init.keystore_run }}" ]
           volumeMounts:
           - name: secrets-store-inline   #  Mounted this volume from the csi driver. 
             mountPath: {{ .Values.init.csiVolume }}  

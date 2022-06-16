@@ -28,13 +28,4 @@ spec:
       - objectName: "{{ .Values.Secrets.Objects.password.name }}"
         secretPath: {{ .Values.vault.secretsPath }} 
         secretKey: "{{ .Values.Secrets.Objects.password.key }}"
-      - objectName: "{{ .Values.Secrets.Objects.trustedca1.name }}"
-        secretPath: {{ .Values.vault.secretsPath }}
-        secretKey: "{{ .Values.Secrets.Objects.trustedca1.key }}"
-      - objectName: "{{ .Values.Secrets.Objects.trustedca2.name }}"
-        secretPath: {{ .Values.vault.secretsPath }}
-        secretKey: "{{ .Values.Secrets.Objects.trustedca2.key }}"
-      - objectName: "{{ .Values.Secrets.Objects.trustedca3.name }}"
-        secretPath: {{ .Values.vault.secretsPath }}
-        secretKey: "{{ .Values.Secrets.Objects.trustedca3.key }}"
 
