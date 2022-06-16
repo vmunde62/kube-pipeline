@@ -1,0 +1,13 @@
+[Unit]
+Description=unseal the vault
+
+[Service]
+User=root
+Type=oneshot
+WorkingDirectory=/etc/vault
+Environment=VAULT_ADDR='http://0.0.0.0:8200'
+ExecStart=/bin/bash unseal.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

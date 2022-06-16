@@ -1,0 +1,50 @@
+jenkins:
+  vaultServer: http://0.0.0.0:8200
+
+app:
+  appName: webapp-pod
+  saName: default
+  image: jweissig/app:0.0.1
+  containerName: webapp-cluster-1
+  path: /mnt/jksfile
+
+init:
+  image: openjdk:11-jdk
+  pkcsPath: /mnt/jksfile/keystore.pkcs12
+  jksPath: /mnt/jksfile/keystore.jks
+  csiVolume: /mnt/secrets-store/
+  jksfileVolume: /mnt/jksfile
+  spcName: vault-database-cluster-1
+  run: "echo starting;sleep 5;openssl pkcs12 -export -inkey $TLSKEY -in $TLSCRT -out $keystore_pkcs12 -password pass:$JKSPASS;keytool -importkeystore -noprompt -srckeystore $keystore_pkcs12 -srcstoretype pkcs12 -destkeystore $keystore_jks -storepass $JKSPASS -srcstorepass $JKSPASS;echo end"
+
+volumes:
+  path: /mnt/jksfile
+
+vault:
+  secretsPath: secret/data/keypair
+  vaultRole: cluster3-role
+  address: http://external-vault:8200
+  kubernetesMountPath: cluster3
+  policyName: cluster-a-app
+  
+externalvault:
+  name: external-vault
+  port: 8200
+  protocol: TCP
+  ip: 192.168.67.1
+
+Secrets:
+  secretName: vault-secret
+  Objects:
+    tlscrt: 
+      name: TLSCRT                                      # Object/Environment name for secret. 
+      key: tls.crt                                      # Key name used for secret in vault.
+      path: /mnt/secrets-store/TLSCRT                   # Mount path for secret.
+    tlskey:
+      name: TLSKEY
+      key: tls.key
+      path: /mnt/secrets-store/TLSKEY
+    password:
+      name: JKSPASS
+      key: jkspass
+      path: /mnt/secrets-store/JKSPASS

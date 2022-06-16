@@ -1,0 +1,40 @@
+apiVersion: secrets-store.csi.x-k8s.io/v1
+kind: SecretProviderClass
+metadata:
+  name:  {{ .Values.init.spcName }} 
+spec:
+  provider: vault
+  secretObjects:                                                # Creats Kubernetes secrets to mount as Environment Variables.
+    - secretName: {{ .Values.Secrets.secretName }}              # Name for the Kubernetes secret.
+      type: Opaque
+      data:                                                     # Secrets data in pair of object and key, Must be matching with objects in parameters.
+        - objectName: {{ .Values.Secrets.Objects.tlscrt.name }}  
+          key: {{ .Values.Secrets.Objects.tlscrt.key }}
+        - objectName: {{ .Values.Secrets.Objects.tlskey.name }}
+          key: {{ .Values.Secrets.Objects.tlskey.key }}
+        - objectName: {{ .Values.Secrets.Objects.password.name }}
+          key: {{ .Values.Secrets.Objects.password.key }}
+  parameters:
+    vaultAddress: {{ .Values.vault.address }}
+    vaultKubernetesMountPath: {{ .Values.vault.kubernetesMountPath }}
+    roleName: {{ .Values.vault.vaultRole }}
+    objects: |
+      - objectName: "{{ .Values.Secrets.Objects.tlscrt.name }}"
+        secretPath: {{ .Values.vault.secretsPath }} 
+        secretKey: "{{ .Values.Secrets.Objects.tlscrt.key }}"
+      - objectName: "{{ .Values.Secrets.Objects.tlskey.name }}"
+        secretPath: {{ .Values.vault.secretsPath }} 
+        secretKey: "{{ .Values.Secrets.Objects.tlskey.key }}"
+      - objectName: "{{ .Values.Secrets.Objects.password.name }}"
+        secretPath: {{ .Values.vault.secretsPath }} 
+        secretKey: "{{ .Values.Secrets.Objects.password.key }}"
+      - objectName: "{{ .Values.Secrets.Objects.trustedca1.name }}"
+        secretPath: {{ .Values.vault.secretsPath }}
+        secretKey: "{{ .Values.Secrets.Objects.trustedca1.key }}"
+      - objectName: "{{ .Values.Secrets.Objects.trustedca2.name }}"
+        secretPath: {{ .Values.vault.secretsPath }}
+        secretKey: "{{ .Values.Secrets.Objects.trustedca2.key }}"
+      - objectName: "{{ .Values.Secrets.Objects.trustedca3.name }}"
+        secretPath: {{ .Values.vault.secretsPath }}
+        secretKey: "{{ .Values.Secrets.Objects.trustedca3.key }}"
+

@@ -1,0 +1,65 @@
+jenkins:
+  vaultServer: http://0.0.0.0:8200
+
+app:
+  appName: webapp-pod
+  saName: default
+  image: jweissig/app:0.0.1
+  containerName: webapp-cluster-1
+  path: /mnt/jksfile
+
+init:
+  image: openjdk:11-jdk
+  pkcsPath: /mnt/jksfile/keystore.pkcs12
+  jksPath: /mnt/jksfile/keystore.jks
+  truststorePath: /mnt/jksfile/client.truststore
+  csiVolume: /mnt/secrets-store/
+  jksfileVolume: /mnt/jksfile
+  spcName: vault-database-cluster-1
+  keystore_run: echo starting;sleep 5;openssl pkcs12 -export -inkey $TLS_KEY -in $TLS_CRT -out $keystore_pkcs12 -password pass:$JKSPASS;keytool -importkeystore -noprompt -srckeystore $keystore_pkcs12 -srcstoretype pkcs12 -destkeystore $keystore_jks -storepass $JKSPASS -srcstorepass $JKSPASS;echo done
+  truststore_run: cd /mnt/secrets-store;for cert in TRUSTED*;do keytool -import -noprompt -trustcacerts -alias $cert -file $cert -keystore $client_truststore -storepass $JKSPASS;done
+
+volumes:
+  path: /mnt/jksfile
+
+vault:
+  secretsPath: secret/data/keypair
+  vaultRole: cluster1-role
+  address: http://external-vault:8200
+  kubernetesMountPath: cluster1
+  policyName: cluster-a-app
+  
+externalvault:
+  name: external-vault
+  port: 8200
+  protocol: TCP
+  ip: 192.168.49.1
+
+Secrets:
+  secretName: vault-secret
+  Objects:
+    tlscrt: 
+      name: TLS_CRT                                      # Object/Environment name for secret. 
+      key: tls.crt                                      # Key name used for secret in vault.
+      path: /mnt/secrets-store/TLS_CRT                   # Mount path for secret.
+    tlskey:
+      name: TLS_KEY
+      key: tls.key
+      path: /mnt/secrets-store/TLS_KEY
+    password:
+      name: JKSPASS
+      key: jkspass
+      path: /mnt/secrets-store/JKS_PASS
+    trustedca1:
+      name: TRUSTED_CA1
+      key: trustedca1
+      path: /mnt/secrets-store/TRUSTED_CA1
+    trustedca2:
+      name: TRUSTED_CA2
+      key: trustedca2
+      path: /mnt/secrets-store/TRUSTED_CA2
+    trustedca3:
+      name: TRUSTED_CA3
+      key: trustedca3
+      path: /mnt/secrets-store/TRUSTED_CA3
+    
