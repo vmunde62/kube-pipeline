@@ -27,11 +27,10 @@ pipeline {
             steps {
                 sh """
                     kubectl config use-context ${params.clusterName}
-                    kubectl create namespace ${params.nameSpace} || true
-                    kubectl config set-context --current --namespace ${params.nameSpace}
+                    kubectl config set-context --current --namespace kube-system
                     kubectl create sa default || true
-                    helm install vault-${params.nameSpace} vault_helm -n ${params.nameSpace} || true
-                    helm install csi-${params.nameSpace} csi_helm -n ${params.nameSpace} || true
+                    helm upgrade --install vault vault_helm -n kube-system || true
+                    helm upgrade --install csi csi_helm -n kube-system || true
                     """
             }
         }
@@ -52,9 +51,9 @@ pipeline {
                     kubernetes_ca_cert="$KUBE_CA_CERT" \
                     issuer="https://kubernetes.default.svc.cluster.local"
 
-                    echo -e "path \\"secret/data/keypair\\" {\\n  capabilities = [\\"read\\"]\\n}" > policy.hcl
                     vault policy write -address=$vaultServer $policyName policy.hcl
 
+                    kubectl config set-context --current --namespace ${params.nameSpace}
                     vault write -address=$vaultServer auth/${params.clusterName}/role/${params.clusterName}-${params.nameSpace}-role \
                     bound_service_account_names=default \
                     bound_service_account_namespaces=${params.nameSpace} \
@@ -66,7 +65,7 @@ pipeline {
         stage('Helm Deploy') {
             steps {
                 sh """
-                    helm upgrade --install webapp webapp-helm --values webapp-helm/$valuesYaml || true
+                    helm upgrade --install webapp webapp-helm --values webapp-helm/$valuesYaml -n ${params.nameSpace} || true
                 """
             } 
         }

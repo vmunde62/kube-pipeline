@@ -3,7 +3,6 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: {{ template "vault.fullname" . }}-csi-provider-clusterrole
-  namespace: {{ .Release.Namespace }}
   labels:
     app.kubernetes.io/name: {{ include "vault.name" . }}-csi-provider
     app.kubernetes.io/instance: {{ .Release.Name }}

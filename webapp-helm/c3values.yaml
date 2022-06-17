@@ -30,7 +30,7 @@ externalvault:
   name: external-vault
   port: 8200
   protocol: TCP
-  ip: 192.168.49.1
+  ip: 192.168.67.1
 
 Secrets:
   secretName: vault-secret
