@@ -30,8 +30,8 @@ pipeline {
                     kubectl create namespace ${params.nameSpace} || true
                     kubectl config set-context --current --namespace ${params.nameSpace}
                     kubectl create sa default || true
-                    helm install vault vault_helm -n ${params.nameSpace} || true
-                    helm install csi csi_helm -n ${params.nameSpace} || true
+                    helm install vault-${params.nameSpace} vault_helm -n ${params.nameSpace} || true
+                    helm install csi-${params.nameSpace} csi_helm -n ${params.nameSpace} || true
                     """
             }
         }
