@@ -14,7 +14,7 @@ init:
   jksPath: /mnt/jksfile/keystore.jks
   csiVolume: /mnt/secrets-store/
   jksfileVolume: /mnt/jksfile
-  spcName: vault-database-cluster-1
+  spcName: vault-spc-cluster1
   keystore_run: echo starting;sleep 5;openssl pkcs12 -export -inkey $TLS_KEY -in $TLS_CRT -out $keystore_pkcs12 -password pass:$JKSPASS;keytool -importkeystore -noprompt -srckeystore $keystore_pkcs12 -srcstoretype pkcs12 -destkeystore $keystore_jks -storepass $JKSPASS -srcstorepass $JKSPASS;echo done
 volumes:
   path: /mnt/jksfile

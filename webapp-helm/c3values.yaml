@@ -5,7 +5,7 @@ app:
   appName: webapp-pod
   saName: default
   image: jweissig/app:0.0.1
-  containerName: webapp-cluster-1
+  containerName: webapp
   path: /mnt/jksfile
 
 init:
@@ -14,9 +14,8 @@ init:
   jksPath: /mnt/jksfile/keystore.jks
   csiVolume: /mnt/secrets-store/
   jksfileVolume: /mnt/jksfile
-  spcName: vault-database-cluster-1
-  run: "echo starting;sleep 5;openssl pkcs12 -export -inkey $TLSKEY -in $TLSCRT -out $keystore_pkcs12 -password pass:$JKSPASS;keytool -importkeystore -noprompt -srckeystore $keystore_pkcs12 -srcstoretype pkcs12 -destkeystore $keystore_jks -storepass $JKSPASS -srcstorepass $JKSPASS;echo end"
-
+  spcName: vault-spc-cluster3
+  keystore_run: echo starting;sleep 5;openssl pkcs12 -export -inkey $TLS_KEY -in $TLS_CRT -out $keystore_pkcs12 -password pass:$JKSPASS;keytool -importkeystore -noprompt -srckeystore $keystore_pkcs12 -srcstoretype pkcs12 -destkeystore $keystore_jks -storepass $JKSPASS -srcstorepass $JKSPASS;echo done
 volumes:
   path: /mnt/jksfile
 
@@ -25,26 +24,26 @@ vault:
   vaultRole: cluster3-role
   address: http://external-vault:8200
   kubernetesMountPath: cluster3
-  policyName: cluster-a-app
+  policyName: cluster3-policy
   
 externalvault:
   name: external-vault
   port: 8200
   protocol: TCP
-  ip: 192.168.67.1
+  ip: 192.168.49.1
 
 Secrets:
   secretName: vault-secret
   Objects:
     tlscrt: 
-      name: TLSCRT                                      # Object/Environment name for secret. 
+      name: TLS_CRT                                      # Object/Environment name for secret. 
       key: tls.crt                                      # Key name used for secret in vault.
-      path: /mnt/secrets-store/TLSCRT                   # Mount path for secret.
+      path: /mnt/secrets-store/TLS_CRT                   # Mount path for secret.
     tlskey:
-      name: TLSKEY
+      name: TLS_KEY
       key: tls.key
-      path: /mnt/secrets-store/TLSKEY
+      path: /mnt/secrets-store/TLS_KEY
     password:
       name: JKSPASS
       key: jkspass
-      path: /mnt/secrets-store/JKSPASS
+      path: /mnt/secrets-store/JKS_PASS
