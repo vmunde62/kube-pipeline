@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp-deployment
+  labels:
+    app: webapp
+spec:
+  selector:
+    matchLabels:
+      app: webapp
+  template:
+    metadata:
+      name: 
+      labels:
+        app: webapp
+    spec:  
+      serviceAccountName: default
+      containers:
+        - image: jweissig/app:0.0.1  
+          name: webapp  
+          volumeMounts:
+          - name: jksfile
+            mountPath: /mnt/jksfile
+          - name: secrets-store-inline                            #  Mounted this volume from the csi driver. 
+            mountPath: /mnt/secrets-store/  
+            readOnly: true 
+      initContainers:
+        - name: keystore
+          image: openjdk:11-jdk  
+          env:
+            - name: TLS_CRT
+              value: /mnt/secrets-store/TLS_CRT
+            - name: TLS_KEY
+              value: /mnt/secrets-store/TLS_KEY 
+            - name: JKSPASS
+              value: /mnt/secrets-store/JKS_PASS 
+            - name: keystore_pkcs12
+              value: /mnt/jksfile/keystore.pkcs12
+            - name: keystore_jks
+              value: /mnt/jksfile/keystore.jks
+          command: ["/bin/sh"]
+          args: ["-c", "echo starting;sleep 5;openssl pkcs12 -export -inkey $TLS_KEY -in $TLS_CRT -out $keystore_pkcs12 -password pass:$JKSPASS;keytool -importkeystore -noprompt -srckeystore $keystore_pkcs12 -srcstoretype pkcs12 -destkeystore $keystore_jks -storepass $JKSPASS -srcstorepass $JKSPASS;echo done" ]
+          volumeMounts:
+          - name: secrets-store-inline   #  Mounted this volume from the csi driver. 
+            mountPath: /mnt/secrets-store/  
+            readOnly: true
+          - name: jksfile
+            mountPath: /mnt/jksfile   
+
+      volumes:
+        - name: secrets-store-inline
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: vault-spc-cluster1 
+        - name: jksfile
+          emptyDir: {}
+

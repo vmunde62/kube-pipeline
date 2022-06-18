@@ -28,9 +28,8 @@ pipeline {
                 sh """
                     kubectl config use-context ${params.clusterName}
                     kubectl config set-context --current --namespace kube-system
-                    kubectl create sa default || true
-                    helm upgrade --install vault vault_helm -n kube-system || true
-                    helm upgrade --install csi csi_helm -n kube-system || true
+                    helm upgrade --install vault vault_helm --namespace=kube-system || true
+                    helm upgrade --install csi csi_helm --namespace=kube-system || true
                     """
             }
         }
@@ -53,7 +52,6 @@ pipeline {
 
                     vault policy write -address=$vaultServer $policyName policy.hcl
 
-                    kubectl config set-context --current --namespace ${params.nameSpace}
                     vault write -address=$vaultServer auth/${params.clusterName}/role/${params.clusterName}-${params.nameSpace}-role \
                     bound_service_account_names=default \
                     bound_service_account_namespaces=${params.nameSpace} \
@@ -65,7 +63,8 @@ pipeline {
         stage('Helm Deploy') {
             steps {
                 sh """
-                    helm upgrade --install webapp webapp-helm --values webapp-helm/$valuesYaml -n ${params.nameSpace} || true
+                    kubectl create ns ${params.nameSpace} || true
+                    helm upgrade --install webapp webapp-helm --values webapp-helm/$valuesYaml --namespace=${params.nameSpace} || true
                 """
             } 
         }

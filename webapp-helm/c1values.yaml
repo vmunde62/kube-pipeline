@@ -21,8 +21,8 @@ volumes:
 
 vault:
   secretsPath: secret/data/keypair
-  vaultRole: cluster1-role
-  address: http://external-vault:8200
+  vaultRole: cluster1-ns1-role
+  address: http://192.168.49.1:8200
   kubernetesMountPath: cluster1
   policyName: cluster1-policy
   

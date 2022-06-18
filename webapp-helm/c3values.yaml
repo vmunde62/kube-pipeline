@@ -22,7 +22,7 @@ volumes:
 vault:
   secretsPath: secret/data/keypair
   vaultRole: cluster3-role
-  address: http://external-vault:8200
+  address: http://192.168.67.1:8200
   kubernetesMountPath: cluster3
   policyName: cluster3-policy
   
